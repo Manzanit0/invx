@@ -7,6 +7,8 @@ defmodule NousWeb.Router do
 
   scope "/api", NousWeb do
     pipe_through :api
+
+    post "/receipts/parse", ReceiptsController, :parse_receipt
   end
 
   if Mix.env() in [:dev, :test] do
