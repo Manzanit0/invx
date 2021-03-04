@@ -34,7 +34,9 @@ defmodule Nous.MixProject do
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:aws, "~> 0.7.0"},
+      {:hackney, "~> 1.17"}
     ]
   end
 
