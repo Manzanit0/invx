@@ -34,7 +34,7 @@ defmodule NousTest.ReceiptsParserTest do
       assert result == %{"tomatoes" => 0.45}
     end
 
-    test "prices trailing letters are parsed" do
+    test "prices with trailing letters are parsed" do
       table = %{
         {2, 1} => "tomatoes",
         {2, 2} => "3.45 C"
@@ -42,6 +42,26 @@ defmodule NousTest.ReceiptsParserTest do
 
       result = ReceiptsParser.table_result_to_price_map(table)
       assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "prices with leading letters are parsed" do
+      table = %{
+        {2, 1} => "tomatoes",
+        {2, 2} => "N/a3.45 C"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "names with numbers are allowed" do
+      table = %{
+        {2, 1} => "tomatoes x1.99",
+        {2, 2} => "3.45"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes x1.99" => 3.45}
     end
 
     test "a complete ticket" do

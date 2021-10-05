@@ -9,8 +9,12 @@ defmodule Nous.Receipts.ReceiptsParser do
   """
   @spec table_result_to_price_map(Nous.Tesseract.table()) :: map
   def table_result_to_price_map(map) do
-    Enum.reduce(map, %{}, fn {{row, _col}, text}, acc ->
-      text = text |> unwrap_text() |> maybe_parse_float()
+    Enum.reduce(map, %{}, fn {{row, col}, text}, acc ->
+      # col == 1 is the concept, col == 2 is the price
+      text =
+        if col > 1,
+          do: text |> unwrap_text() |> maybe_parse_float(),
+          else: unwrap_text(text)
 
       cond do
         text == "N/a" ->
@@ -34,11 +38,17 @@ defmodule Nous.Receipts.ReceiptsParser do
   defp maybe_parse_float("." <> text), do: maybe_parse_float("0." <> text)
 
   defp maybe_parse_float(text) do
-    text
-    |> String.replace(",", ".")
-    |> Float.parse()
-    |> case do
-      :error -> text
+    curated = String.replace(text, ",", ".")
+
+    # Extract floating point numbers from the string.
+    number =
+      case Regex.scan(~r/\-*\d+\.\d+/, curated) do
+        [[number] | _] -> number
+        _ -> curated
+      end
+
+    case Float.parse(number) do
+      :error -> number
       {f, _} -> f
     end
   end
