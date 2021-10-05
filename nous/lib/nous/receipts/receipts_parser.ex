@@ -1,4 +1,4 @@
-defmodule Nous.ReceiptsParser do
+defmodule Nous.Receipts.ReceiptsParser do
   require Logger
 
   @doc """
@@ -30,10 +30,14 @@ defmodule Nous.ReceiptsParser do
   defp unwrap_text(text) when is_binary(text), do: text
   defp unwrap_text([text | _t]), do: text
 
-  defp maybe_parse_float("," <> text), do: maybe_parse_float("0" <> text)
+  defp maybe_parse_float("," <> text), do: maybe_parse_float("0," <> text)
+  defp maybe_parse_float("." <> text), do: maybe_parse_float("0." <> text)
 
   defp maybe_parse_float(text) do
-    case Float.parse(text) do
+    text
+    |> String.replace(",", ".")
+    |> Float.parse()
+    |> case do
       :error -> text
       {f, _} -> f
     end

@@ -10,7 +10,9 @@ config :nous, Nous.Repo,
   password: "postgres",
   database: "nous_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  show_sensitive_data_on_connection_error: true,
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 20
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

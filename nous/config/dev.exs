@@ -13,7 +13,19 @@ config :nous, NousWeb.Endpoint,
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
-  watchers: []
+  watchers: [],
+  server: true
+
+config :nous, NousWeb.Endpoint,
+  live_reload: [
+    patterns: [
+      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+      ~r{priv/gettext/.*(po)$},
+      ~r{lib/nous_web/controllers/.*(ex)$},
+      ~r{lib/nous_web/views/.*(ex)$},
+      ~r{lib/nous_web/templates/.*(eex)$}
+    ]
+  ]
 
 config :logger, :console, format: "[$level] $message\n"
 
