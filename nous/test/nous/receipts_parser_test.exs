@@ -1,5 +1,6 @@
 defmodule NousTest.ReceiptsParserTest do
   use ExUnit.Case, async: true
+  import ExUnit.CaptureLog
 
   alias Nous.Receipts.ReceiptsParser
 
@@ -64,7 +65,7 @@ defmodule NousTest.ReceiptsParserTest do
       assert result == %{"tomatoes x1.99" => 3.45}
     end
 
-    test "a complete ticket" do
+    test "a complete ticket (Carrefour)" do
       carrefour_analysis = %{
         {51, 2} => "2.71 ",
         {23, 2} => "2.81 ",
@@ -243,6 +244,73 @@ defmodule NousTest.ReceiptsParserTest do
 
       result = ReceiptsParser.table_result_to_price_map(carrefour_analysis)
       assert result == expected
+    end
+
+    test "another complete ticket (LIDL)" do
+      lidl_analysis = %{
+        {18, 2} => "7.99 8 ",
+        {2, 1} => "Milbona/Leche fresca ent ",
+        {2, 2} => "0,78 A ",
+        {6, 1} => "Tomate cherry rama ",
+        {15, 2} => "0,85 A ",
+        {5, 1} => "Pimiento rojo kg 0,370 kg x 1.89 EUR/kg ",
+        {7, 1} => "Dto. Lidl Plus ",
+        {3, 1} => "Puerro 500g ",
+        {17, 2} => "1,99 8 ",
+        {6, 2} => "N/a1,99 A ",
+        {8, 2} => "0,95 A ",
+        {11, 2} => "N/aX X 0,10 C ",
+        {7, 2} => "-0.50 ",
+        # this will trigger warning
+        {9, 1} => "0,476 kg x 1,99 EUR/kg ",
+        {9, 2} => "N/a",
+        {16, 2} => "1,49 B ",
+        {16, 1} => "Bulbos de primaver ",
+        {11, 1} => "Lidl/Bolsa pequeña ",
+        {12, 1} => "Bacalao punto sal ",
+        {4, 1} => "Judia plana ",
+        {5, 2} => "0,70 A ",
+        # this will trigger warning
+        {1, 1} => "N/a",
+        {1, 2} => "EUR ",
+        {4, 2} => "2,19 A ",
+        {10, 2} => "N/a3,98 B 1.99 ",
+        {10, 1} => "Acentino/Vinagre balsámi x1,99 Dto. Lidl Plus ",
+        {8, 1} => "Manzana Reineta ",
+        {14, 1} => "Cebolla 1 Kg ",
+        {14, 2} => "1,19 A ",
+        {3, 2} => "1,69 A ",
+        {15, 1} => "Lima pack 4 ",
+        {17, 1} => "Ciclamen ",
+        # this will trigger warning
+        {13, 1} => "0,500 kg x 11.29 EUR/kg ",
+        {13, 2} => "N/a",
+        {18, 1} => "Cúrcuma ",
+        {12, 2} => "5,65 8 "
+      }
+
+      expected = %{
+        "Acentino/Vinagre balsámi x1,99 Dto. Lidl Plus " => 3.98,
+        "Bacalao punto sal " => 5.65,
+        "Bulbos de primaver " => 1.49,
+        "Cebolla 1 Kg " => 1.19,
+        "Ciclamen " => 1.99,
+        "Cúrcuma " => 7.99,
+        "Dto. Lidl Plus " => -0.5,
+        "Judia plana " => 2.19,
+        "Lidl/Bolsa pequeña " => 0.1,
+        "Lima pack 4 " => 0.85,
+        "Manzana Reineta " => 0.95,
+        "Milbona/Leche fresca ent " => 0.78,
+        "Pimiento rojo kg 0,370 kg x 1.89 EUR/kg " => 0.7,
+        "Puerro 500g " => 1.69,
+        "Tomate cherry rama " => 1.99
+      }
+
+      assert capture_log(fn ->
+               result = ReceiptsParser.table_result_to_price_map(lidl_analysis)
+               assert result == expected
+             end) =~ "received unknown element"
     end
   end
 end
