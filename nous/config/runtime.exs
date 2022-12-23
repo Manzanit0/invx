@@ -31,4 +31,6 @@ if config_env() != :test do
     access_key_id: System.fetch_env!("AWS_ACCESS_KEY_ID"),
     secret_access_key: System.fetch_env!("AWS_SECRET_ACCESS_KEY"),
     region: System.fetch_env!("AWS_REGION")
+
+  config :nous, NousWeb.Auth, secrets: System.fetch_env!("NOUS_AUTH_SECRETS")
 end

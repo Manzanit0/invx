@@ -3,6 +3,7 @@ defmodule NousWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug NousWeb.Auth
   end
 
   scope "/api", NousWeb do
