@@ -21,6 +21,7 @@ services:
       - MIX_ENV=dev
       - DATABASE_URL=ecto://postgres:postgres@database:5432/nous_dev
       - SECRET_KEY_BASE=ZTdZFDTMJqgfUtZTKgtLnR/utjhdsUhObNlrgqHT5xG45nJDLcXGKES+FPjLXKUQ
+      - NOUS_AUTH_SECRETS=foo
     env_file:
       - .env
     ports:

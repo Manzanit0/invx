@@ -21,4 +21,10 @@ defmodule NousWeb.ReceiptsController do
         json(conn, %{error: "#{inspect(other)}"})
     end
   end
+
+  def parse_receipt(conn, _) do
+    conn
+    |> put_status(400)
+    |> json(%{error: "missing 'receipt' property"})
+  end
 end

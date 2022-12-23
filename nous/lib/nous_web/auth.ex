@@ -17,7 +17,7 @@ defmodule NousWeb.Auth do
       assign(conn, :current_user, token)
     else
       conn
-      |> send_resp(400, "Unauthorized")
+      |> send_resp(401, "Unauthorized")
       |> halt()
     end
   end
