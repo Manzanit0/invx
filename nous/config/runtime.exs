@@ -38,5 +38,13 @@ if config_env() != :test do
     secret_access_key: System.fetch_env!("AWS_SECRET_ACCESS_KEY"),
     region: System.fetch_env!("AWS_REGION")
 
-  config :nous, NousWeb.Auth, secrets: System.fetch_env!("NOUS_AUTH_SECRETS")
+  secrets =
+    System.get_env("NOUS_AUTH_SECRETS") ||
+      raise """
+      environment variable NOUS_AUTH_SECRETS is missing.
+      Any number of strings separated by comma are valid. These are what clients
+      will leverage to authenticate.
+      """
+
+  config :nous, NousWeb.Auth, secrets: secrets
 end
