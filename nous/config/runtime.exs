@@ -26,7 +26,7 @@ if config_env() != :test do
   host = System.get_env("PHX_HOST") || "example.com"
 
   config :nous, NousWeb.Endpoint,
-    url: [host: host, port: 443],
+    url: [host: host, port: 80],
     http: [
       port: String.to_integer(System.get_env("PORT") || "4000"),
       transport_options: [socket_opts: [:inet6]]
