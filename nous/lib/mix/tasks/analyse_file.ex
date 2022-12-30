@@ -30,7 +30,7 @@ defmodule Mix.Tasks.AnalyseFile do
           label: :raw_analysis_result
         )
 
-        mapped_prices = Nous.ReceiptsParser.table_result_to_price_map(table)
+        mapped_prices = Nous.Receipts.ReceiptsParser.table_result_to_price_map(table)
 
         IO.inspect(mapped_prices,
           syntax_colors: @syntax_colours,
