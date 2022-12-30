@@ -5,6 +5,22 @@ defmodule NousTest.ReceiptsParserTest do
   alias Nous.Receipts.ReceiptsParser
 
   describe "receipts parser" do
+    test "receipts with multiple columns are reduced to two: item and price" do
+      table = %{
+        {1, 1} => "PRODUCTO",
+        {1, 2} => "€/L ",
+        {1, 3} => "LITROS ",
+        {1, 4} => "IMPORTE",
+        {2, 1} => "EFITED 95",
+        {2, 2} => "1,789 ",
+        {2, 3} => "22,36 ",
+        {2, 4} => "40,00 SOLRED "
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"IMPORTE" => "PRODUCTO", "EFITED 95" => 40.00}
+    end
+
     test "prices with dots are parsed" do
       table = %{
         {2, 1} => "tomatoes",

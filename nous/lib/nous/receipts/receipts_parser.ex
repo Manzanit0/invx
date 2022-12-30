@@ -9,6 +9,8 @@ defmodule Nous.Receipts.ReceiptsParser do
   """
   @spec table_result_to_price_map(Nous.Tesseract.table()) :: map
   def table_result_to_price_map(map) do
+    map = if get_columns_amount(map) == 2, do: map, else: reduce_multicolumn_map_to_2_columns(map)
+
     Enum.reduce(map, %{}, fn {{row, col}, text}, acc ->
       # col == 1 is the concept, col == 2 is the price
       text =
@@ -29,6 +31,63 @@ defmodule Nous.Receipts.ReceiptsParser do
     end)
     |> Map.values()
     |> Enum.reduce(%{}, &price_reductor/2)
+  end
+
+  # get the number of columns in the receipt table.  Since the map has the
+  # format: {row, column} => value, it can be infered from the maximum value of
+  # "column".
+  defp get_columns_amount(map) do
+    Enum.reduce(map, 0, fn
+      {{_, col}, _}, acc when col > acc -> col
+      _, acc -> acc
+    end)
+  end
+
+  # Many receipts have multiple columns: the item, a description, an amount,
+  # another description, etc. In these scenarios we want to reduce the map to a
+  # simple {description, total} tuple. That's what this function does.
+  defp reduce_multicolumn_map_to_2_columns(map) do
+    header = for {{row, _}, value} when row == 1 <- map, reduce: [], do: (acc -> [value | acc])
+    product_name_position = 1 + Enum.find_index(header, &item_name?/1)
+    product_price_position = 1 + Enum.find_index(header, &item_price?/1)
+
+    for {{row, col}, value}
+        when col == product_name_position or col == product_price_position <-
+          map,
+        reduce: %{},
+        do: (acc -> Map.put(acc, {row, col}, value))
+  end
+
+  defp item_name?(name) do
+    name
+    |> String.downcase()
+    |> String.trim()
+    |> case do
+      "producto" -> true
+      "produto" -> true
+      "product" -> true
+      "servicio" -> true
+      "service" -> true
+      "articulo" -> true
+      "description" -> true
+      "descripcion" -> true
+      "descripción" -> true
+      _ -> false
+    end
+  end
+
+  defp item_price?(name) do
+    name
+    |> String.downcase()
+    |> String.trim()
+    |> case do
+      # total first, in case there's both total and price
+      "total" -> true
+      "importe" -> true
+      "price" -> true
+      "precio" -> true
+      _ -> false
+    end
   end
 
   defp unwrap_text(text) when is_binary(text), do: text
