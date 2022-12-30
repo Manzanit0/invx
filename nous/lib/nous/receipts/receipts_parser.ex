@@ -48,11 +48,22 @@ defmodule Nous.Receipts.ReceiptsParser do
   # simple {description, total} tuple. That's what this function does.
   defp reduce_multicolumn_map_to_2_columns(map) do
     header = for {{row, _}, value} when row == 1 <- map, reduce: [], do: (acc -> [value | acc])
-    product_name_position = 1 + Enum.find_index(header, &item_name?/1)
-    product_price_position = 1 + Enum.find_index(header, &item_price?/1)
+    header = Enum.reverse(header)
+    product_name_position = 1 + (Enum.find_index(header, &item_name?/1) || -1)
+    product_price_position = 1 + (Enum.find_index(header, &item_price?/1) || -1)
+
+    # This is me just being plain lazy and not wanting to write cleaner code.
+    # TLDR; if there's a total column, use that, otherwise use price.
+    product_total_position =
+      1 +
+        (Enum.find_index(header, fn x -> x |> String.downcase() |> String.trim() == "total" end) ||
+           -1)
+
+    use_me =
+      if product_total_position > 0, do: product_total_position, else: product_price_position
 
     for {{row, col}, value}
-        when col == product_name_position or col == product_price_position <-
+        when col == product_name_position or col == use_me <-
           map,
         reduce: %{},
         do: (acc -> Map.put(acc, {row, col}, value))

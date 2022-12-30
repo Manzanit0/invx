@@ -19,6 +19,29 @@ defmodule NousTest.ReceiptsParserTest do
 
       result = ReceiptsParser.table_result_to_price_map(table)
       assert result == %{"IMPORTE" => "PRODUCTO", "EFITED 95" => 40.00}
+
+      table = %{
+        {1, 1} => "Und ",
+        {1, 2} => "Articulo ",
+        {1, 3} => "Precio ",
+        {1, 4} => "Total ",
+        {2, 1} => "2,00 ",
+        {2, 2} => "HAMB. TERNERA",
+        {2, 3} => "7,90 ",
+        {2, 4} => "15,80 ",
+        {3, 1} => "1,00 ",
+        {3, 2} => "CROQUETAS JAMON",
+        {3, 3} => "9,00 ",
+        {3, 4} => "9,00 "
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+
+      assert result == %{
+               "HAMB. TERNERA" => 15.80,
+               "CROQUETAS JAMON" => 9.00,
+               "Total " => "Articulo "
+             }
     end
 
     test "prices with dots are parsed" do
