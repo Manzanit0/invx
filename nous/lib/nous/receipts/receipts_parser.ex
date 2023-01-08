@@ -101,6 +101,7 @@ defmodule Nous.Receipts.ReceiptsParser do
       "price" -> true
       "precio" -> true
       "euro" -> true
+      "€" -> true
       _ -> false
     end
   end
