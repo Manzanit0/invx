@@ -5,6 +5,86 @@ defmodule NousTest.ReceiptsParserTest do
   alias Nous.Receipts.ReceiptsParser
 
   describe "receipts parser" do
+    test "prices with dots are parsed" do
+      table = %{
+        {2, 1} => "tomatoes",
+        {2, 2} => "3.45 "
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "prices with commas are parsed" do
+      table = %{
+        {2, 1} => "tomatoes",
+        {2, 2} => "3,45 "
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "prices without leading zero are parsed" do
+      table = %{
+        {2, 1} => "tomatoes",
+        {2, 2} => ",45 "
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 0.45}
+    end
+
+    test "prices with trailing letters are parsed" do
+      table = %{
+        {2, 1} => "tomatoes",
+        {2, 2} => "3.45 C"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "prices with leading letters are parsed" do
+      table = %{
+        {2, 1} => "tomatoes",
+        {2, 2} => "N/a3.45 C"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "descriptions with trailing spaces are trimmed" do
+      table = %{
+        {2, 1} => "tomatoes ",
+        {2, 2} => "3.45"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "descriptions with leading spaces are trimmed" do
+      table = %{
+        {2, 1} => " tomatoes",
+        {2, 2} => "3.45"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "descriptions with numbers are allowed" do
+      table = %{
+        {2, 1} => "tomatoes x1.99",
+        {2, 2} => "3.45"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes x1.99" => 3.45}
+    end
+
     test "receipts with numbers as item descriptions" do
       table = %{
         {1, 1} => "kg",
@@ -88,86 +168,6 @@ defmodule NousTest.ReceiptsParserTest do
                "CROQUETAS JAMON" => 9.00,
                "Total" => "Articulo"
              }
-    end
-
-    test "prices with dots are parsed" do
-      table = %{
-        {2, 1} => "tomatoes",
-        {2, 2} => "3.45 "
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 3.45}
-    end
-
-    test "prices with commas are parsed" do
-      table = %{
-        {2, 1} => "tomatoes",
-        {2, 2} => "3,45 "
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 3.45}
-    end
-
-    test "prices without leading zero are parsed" do
-      table = %{
-        {2, 1} => "tomatoes",
-        {2, 2} => ",45 "
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 0.45}
-    end
-
-    test "prices with trailing letters are parsed" do
-      table = %{
-        {2, 1} => "tomatoes",
-        {2, 2} => "3.45 C"
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 3.45}
-    end
-
-    test "prices with leading letters are parsed" do
-      table = %{
-        {2, 1} => "tomatoes",
-        {2, 2} => "N/a3.45 C"
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 3.45}
-    end
-
-    test "descriptions with trailing spaces are trimmed" do
-      table = %{
-        {2, 1} => "tomatoes ",
-        {2, 2} => "3.45"
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 3.45}
-    end
-
-    test "descriptions with leading spaces are trimmed" do
-      table = %{
-        {2, 1} => " tomatoes",
-        {2, 2} => "3.45"
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes" => 3.45}
-    end
-
-    test "names with numbers are allowed" do
-      table = %{
-        {2, 1} => "tomatoes x1.99",
-        {2, 2} => "3.45"
-      }
-
-      result = ReceiptsParser.table_result_to_price_map(table)
-      assert result == %{"tomatoes x1.99" => 3.45}
     end
 
     test "a complete ticket (Carrefour)" do
