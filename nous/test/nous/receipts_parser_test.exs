@@ -140,6 +140,26 @@ defmodule NousTest.ReceiptsParserTest do
       assert result == %{"tomatoes" => 3.45}
     end
 
+    test "descriptions with trailing spaces are trimmed" do
+      table = %{
+        {2, 1} => "tomatoes ",
+        {2, 2} => "3.45"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
+    test "descriptions with leading spaces are trimmed" do
+      table = %{
+        {2, 1} => " tomatoes",
+        {2, 2} => "3.45"
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+      assert result == %{"tomatoes" => 3.45}
+    end
+
     test "names with numbers are allowed" do
       table = %{
         {2, 1} => "tomatoes x1.99",

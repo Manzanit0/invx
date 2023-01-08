@@ -105,8 +105,8 @@ defmodule Nous.Receipts.ReceiptsParser do
     end
   end
 
-  defp unwrap_text(text) when is_binary(text), do: text
-  defp unwrap_text([text | _t]), do: text
+  defp unwrap_text(text) when is_binary(text), do: String.trim(text)
+  defp unwrap_text([text | _t]), do: unwrap_text(text)
 
   defp maybe_parse_float("," <> text), do: maybe_parse_float("0," <> text)
   defp maybe_parse_float("." <> text), do: maybe_parse_float("0." <> text)
