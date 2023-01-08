@@ -5,6 +5,52 @@ defmodule NousTest.ReceiptsParserTest do
   alias Nous.Receipts.ReceiptsParser
 
   describe "receipts parser" do
+    test "receipts with numbers as item descriptions" do
+      table = %{
+        {1, 1} => "kg ",
+        {1, 2} => "EURO/k9 ",
+        {1, 3} => "EURO ",
+        {2, 1} => "1.715 ",
+        {2, 2} => "13.25 ",
+        {2, 3} => "9.47 ",
+        {3, 1} => ".575 ",
+        {3, 2} => "12.50 ",
+        {3, 3} => "7.19 ",
+        {4, 1} => ".235 ",
+        {4, 2} => "3.50 ",
+        {4, 3} => "0.82 ",
+        {5, 1} => ".100 ",
+        {5, 2} => "4.60 ",
+        {5, 3} => "0.46 ",
+        {6, 1} => ".120 ",
+        {6, 2} => "5.15 ",
+        {6, 3} => "0.62 ",
+        {7, 1} => ".530 ",
+        {7, 2} => "13.00 ",
+        {7, 3} => "6.89 ",
+        {8, 1} => ".105 ",
+        {8, 2} => "40.00 ",
+        {8, 3} => "4.20 ",
+        {9, 1} => ".605 ",
+        {9, 2} => "12.50 ",
+        {9, 3} => "7.56 "
+      }
+
+      result = ReceiptsParser.table_result_to_price_map(table)
+
+      assert result == %{
+               ".100 " => 0.46,
+               ".105 " => 4.2,
+               ".120 " => 0.62,
+               ".235 " => 0.82,
+               ".530 " => 6.89,
+               ".575 " => 7.19,
+               ".605 " => 7.56,
+               "1.715 " => 9.47,
+               "EURO " => "kg "
+             }
+    end
+
     test "receipts with multiple columns are reduced to two: item and price" do
       table = %{
         {1, 1} => "PRODUCTO",

@@ -83,6 +83,9 @@ defmodule Nous.Receipts.ReceiptsParser do
       "description" -> true
       "descripcion" -> true
       "descripción" -> true
+      # In the case of some butchers, they just display the quantity (kg) as
+      # opposed to the actual item.
+      "kg" -> true
       _ -> false
     end
   end
@@ -97,6 +100,7 @@ defmodule Nous.Receipts.ReceiptsParser do
       "importe" -> true
       "price" -> true
       "precio" -> true
+      "euro" -> true
       _ -> false
     end
   end
