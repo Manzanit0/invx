@@ -1,6 +1,14 @@
-FROM elixir:1.13-alpine AS build
+ARG ELIXIR_VERSION=1.16.1
+ARG OTP_VERSION=26.2.1
+ARG DEBIAN_VERSION=bookworm-20240130
 
-RUN apk add --no-cache build-base git curl py-pip
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+
+FROM ${BUILDER_IMAGE} as build
+
+RUN apt-get update -y && apt-get install -y build-essential git curl musl-dev npm\
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 WORKDIR /app
 
@@ -33,16 +41,27 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
-FROM alpine:3.16 AS app
+FROM ${RUNNER_IMAGE} AS app
 
-RUN apk upgrade --no-cache && \
-    apk add --no-cache postgresql-client bash openssl libgcc libstdc++ ncurses-libs
+RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales \
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 WORKDIR /app
+RUN chown nobody /app
 
-RUN chown nobody:nobody /app
-USER nobody:nobody
-COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/nous ./
+ENV MIX_ENV=prod
+
+COPY --from=build --chown=nobody:root /app/_build/prod/rel/nous ./
+
+USER nobody
+
 ENV HOME=/app
 
 CMD ["bin/nous",  "start"]
